@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.application'
+    id 'dev.rikka.tools.refine'
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "de.intelligence.antiautoupdate"
+        minSdk 31
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        viewBinding = true
+        aidl true
+    }
+
+    signingConfigs {
+        sign
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation 'com.google.android.material:material:1.4.0'
+
+    implementation 'androidx.annotation:annotation:1.6.0'
+  //  implementation 'androidx.core:core-splashscreen:1.1.0-alpha01'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.appcompat:appcompat-resources:1.3.0'
+    implementation 'androidx.databinding:databinding-runtime:7.1.0'
+
+    implementation 'com.google.guava:guava:32.1.2-jre'
+    implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
+
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+    implementation 'dev.rikka.shizuku:api:13.1.4'
+    implementation 'dev.rikka.tools.refine:runtime:4.3.0'
+    implementation 'com.github.topjohnwu.libsu:core:5.2.0'
+    implementation 'com.github.topjohnwu.libsu:service:5.2.0'
+    implementation 'com.github.topjohnwu.libsu:nio:5.2.0'
+}

@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">AntiAutoUpdate</string>
+    <string name="app_description">PlayStore auto-update blocker</string>
+    <string name="label_blocked">Blocked</string>
+    <string name="label_allowed">Allowed</string>
+    <string name="root_access">Root access</string>
+    <string name="grant_button">Grant</string>
+    <string name="apply_button">Apply</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="count_default">-/-</string>
+    <string name="count_template">%1$d/%2$d</string>
+    <string name="notification_title">Watchdog running</string>
+    <string name="notification_waiting_root">Waiting for root system service</string>
+    <string name="notification_active_root">Root service running</string>
+    <string name="notification_disconnected_root">Root service disconnected</string>
+    <string name="notification_error_root">Root service failed to start</string>
+    <string name="application_root_needed">For the optimal execution of this application, root is required</string>
+    <string name="application_root_denied">You actively denied root privileges, please allow root access and restart this app</string>
+</resources>
