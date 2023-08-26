@@ -4,7 +4,7 @@
 <h4 align="center">A root based android app that forces decoupling of the PlayStore auto-update system from selected apps.</h4>
 
 ## Planned features
-* Integrate root access through the usage of the [Shizuku-API](https://github.com/RikkaApps/Shizuku-API])
+* Integrate root access through the usage of the [Shizuku-API](https://github.com/RikkaApps/Shizuku-API)
 * More user-friendly app-selection with the ability to sort, filter and search
 * Pre-defined profiles
 ## Known issues
