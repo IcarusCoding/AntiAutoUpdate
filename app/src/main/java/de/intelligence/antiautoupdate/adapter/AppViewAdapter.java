@@ -8,9 +8,13 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -21,7 +25,7 @@ import de.intelligence.antiautoupdate.R;
 import de.intelligence.antiautoupdate.model.AppEntryModel;
 import de.intelligence.antiautoupdate.persistence.ILocalDatabaseAccess;
 
-public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.AppViewHolder> {
+public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.AppViewHolder> implements Filterable {
 
     public interface StateChangedListener {
 
@@ -31,6 +35,7 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
 
     private final Map<String, Boolean> appEntriesOriginal;
     private final List<AppEntryModel> appEntries;
+    private final List<AppEntryModel> appEntriesFiltered;
     private final Map<String, Integer> changedEntries;
     private final StateChangedListener listener;
     private final ILocalDatabaseAccess localDatabaseAccess;
@@ -38,6 +43,7 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
     public AppViewAdapter(StateChangedListener listener, ILocalDatabaseAccess localDatabaseAccess) {
         this.appEntriesOriginal = new HashMap<>();
         this.appEntries = new ArrayList<>();
+        this.appEntriesFiltered = new ArrayList<>();
         this.changedEntries = new HashMap<>();
         this.listener = listener;
         this.localDatabaseAccess = localDatabaseAccess;
@@ -46,6 +52,7 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
     public void addEntries(List<AppEntryModel> entries) {
         this.updateOriginals(entries);
         this.appEntries.addAll(entries);
+        this.appEntriesFiltered.addAll(this.appEntries);
     }
 
     public void updateOriginals(List<AppEntryModel> entries) {
@@ -93,7 +100,7 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull AppViewHolder holder, int position) {
-        final AppEntryModel entry = this.appEntries.get(position);
+        final AppEntryModel entry = this.appEntriesFiltered.get(position);
 
         holder.appName.setText(entry.getAppName());
         holder.appPackageName.setText(entry.getPackageName());
@@ -124,7 +131,12 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
 
     @Override
     public int getItemCount() {
-        return this.appEntries.size();
+        return this.appEntriesFiltered.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new AppViewFilter();
     }
 
     public static final class AppViewHolder extends RecyclerView.ViewHolder {
@@ -140,6 +152,40 @@ public final class AppViewAdapter extends RecyclerView.Adapter<AppViewAdapter.Ap
             this.appName = itemView.findViewById(R.id.appName);
             this.appPackageName = itemView.findViewById(R.id.appPackageName);
             this.appToggleSwitch = itemView.findViewById(R.id.appToggleSwitch);
+        }
+
+    }
+
+    public final class AppViewFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            final String filterCleaned = constraint.toString().toLowerCase().trim();
+            final List<AppEntryModel> filtered;
+            if (filterCleaned.isEmpty()) {
+                filtered = AppViewAdapter.this.appEntries;
+            } else {
+                filtered = new ArrayList<>();
+                for (final AppEntryModel entry : AppViewAdapter.this.appEntries) {
+                    if (entry.getAppName().toLowerCase().contains(filterCleaned) ||
+                            entry.getPackageName().toLowerCase().contains(filterCleaned)) {
+                        filtered.add(entry);
+                    }
+                }
+            }
+            final FilterResults results = new FilterResults();
+            results.values = filtered;
+            return results;
+        }
+
+
+        @Override
+        @SuppressWarnings("unchecked")
+        @SuppressLint("NotifyDataSetChanged")
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            AppViewAdapter.this.appEntriesFiltered.clear();
+            AppViewAdapter.this.appEntriesFiltered.addAll((List<AppEntryModel>) results.values);
+            AppViewAdapter.super.notifyDataSetChanged();
         }
 
     }

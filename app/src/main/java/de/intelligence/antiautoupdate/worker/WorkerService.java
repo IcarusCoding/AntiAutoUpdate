@@ -41,11 +41,13 @@ import de.intelligence.antiautoupdate.root.SystemRootServiceConnection;
 
 public final class WorkerService extends Service implements SystemRootServiceConnection.SystemRootServiceConnectionListener {
 
-    private static final long SCHEDULE_DELAY_MS = Duration.ofSeconds(10).toMillis();
+    private static final long SCHEDULE_DELAY_MS = Duration.ofMinutes(60).toMillis();
     private static final int NOTIFICATION_ID = 4242;
 
     @SuppressLint("SdCardPath")
     private static final String VENDING_DB_PATH = "/data/data/com.android.vending/databases/library.db";
+
+    private static boolean running;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Notification.Builder notificationBuilder;
@@ -54,6 +56,7 @@ public final class WorkerService extends Service implements SystemRootServiceCon
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        WorkerService.running = true;
         this.localDatabaseAccess = new LocalDatabaseAccess(this);
         final Intent notificationIntent = new Intent(this, MainActivity.class);
         final PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
@@ -87,6 +90,7 @@ public final class WorkerService extends Service implements SystemRootServiceCon
     @Override
     public void onDestroy() {
         this.handler.removeCallbacksAndMessages(null);
+        WorkerService.running = false;
     }
 
     @Override
@@ -146,7 +150,7 @@ public final class WorkerService extends Service implements SystemRootServiceCon
             }
         };
         this.handler.removeCallbacksAndMessages(null);
-        this.handler.postDelayed(task, SCHEDULE_DELAY_MS);
+        this.handler.post(task);
     }
 
     @Override
@@ -159,6 +163,10 @@ public final class WorkerService extends Service implements SystemRootServiceCon
     public void onRootServiceException(Throwable throwable) {
         this.updateNotificationText(R.string.notification_error_root);
         this.handler.removeCallbacksAndMessages(null);
+    }
+
+    public static boolean isRunning() {
+        return WorkerService.running;
     }
 
     private void updateNotificationText(int resourceId) {

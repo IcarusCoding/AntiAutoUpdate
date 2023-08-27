@@ -10,7 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
@@ -73,6 +74,21 @@ public final class MainActivity extends AppCompatActivity implements RootDialogF
 
         this.appViewAdapter = new AppViewAdapter(this, this.localDatabaseAccess);
 
+        this.binding.searchInputEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                MainActivity.this.appViewAdapter.getFilter().filter(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         this.recyclerView = this.binding.appView;
         this.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         this.recyclerView.setAdapter(this.appViewAdapter);
@@ -98,13 +114,18 @@ public final class MainActivity extends AppCompatActivity implements RootDialogF
             this.appViewAdapter.notifyDataSetChanged();
         });
 
+        final SharedPreferences preferences = super.getPreferences(Context.MODE_PRIVATE);
+
         this.binding.cancelButton.setOnClickListener(l -> this.appViewAdapter.dismissChanges());
         this.binding.applyButton.setOnClickListener(l -> {
             this.appViewAdapter.saveChanges();
             updateLabels.accept(this.appViewAdapter.getAppEntries());
+            if (WorkerService.isRunning()) {
+                super.stopService(new Intent(this, WorkerService.class));
+                super.startForegroundService(new Intent(this, WorkerService.class));
+            }
         });
 
-        final SharedPreferences preferences = super.getPreferences(Context.MODE_PRIVATE);
         if (preferences.getBoolean("bg-service-running", false)) {
             this.binding.serviceButton.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_pause));
             super.startForegroundService(new Intent(this, WorkerService.class));
